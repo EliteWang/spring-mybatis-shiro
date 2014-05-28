@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd  
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">    
+	
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />	
+        <!-- 要求登录时的链接 -->
+        <property name="loginUrl" value="/login.do"></property>
+		<!-- 登陆成功后，跳转的链接 -->	        
+        <property name="successUrl" value="/index.jsp"></property>
+        <!-- 未授权时要跳转的链接 -->
+        <property name="unauthorizedUrl" value="/unauthorized.jsp"></property>
+        
+        <property name="filters">
+            <util:map>
+                <entry key="authc">
+                    <bean class="org.apache.shiro.web.filter.authc.PassThruAuthenticationFilter"/>
+                </entry>
+            </util:map>
+        </property>
+        <property name="filterChainDefinitionMap">
+            <util:map>
+                <entry key="/login.jsp" value="anon"></entry>
+                <entry key="/logout.do" value="anon"></entry>
+                <entry key="/**/*.do" value="authc"></entry>
+                <entry key="/index.jsp" value="anon"></entry>
+            </util:map>
+        </property>
+    </bean>
+    
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroDataBaseRealm"></property>
+        <property name="sessionManager" ref="sessionManager"></property>
+    </bean>
+    
+    <bean id="shiroDataBaseRealm" class="com.easyjob.security.ShiroDataBaseRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"/>
+        </property>
+    </bean>
+    
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="sessionDAO">
+            <bean class="org.apache.shiro.session.mgt.eis.MemorySessionDAO"></bean>
+        </property>
+    </bean>
+    
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+</beans>
